@@ -1,5 +1,6 @@
 function openPlanSetupModal() {
-    const name = document.getElementById('master-breed-search').value.trim();
+    // Changed from 'master-breed-search' to 'breed-search' to match breedingchangesv7.html
+    const name = document.getElementById('breed-search').value.trim();
     if (!TEM_DATABASE[name]) return alert("Select a valid target species from the search box first.");
     
     document.getElementById('planTargetSpecies').value = name;
@@ -88,8 +89,9 @@ function generateCalculatedPlan() {
         createdAt: new Date().toLocaleDateString()
     };
 
-    breedingPlans.push(newPlan);
-    localStorage.setItem('breeding_plans', JSON.stringify(breedingPlans));
+    // Use window scope to match app_logic declaration
+    window.breedingPlans.push(newPlan);
+    localStorage.setItem('breeding_plans', JSON.stringify(window.breedingPlans));
     closePlanSetupModal();
     renderPlans();
     showView('plans-view', document.getElementById('nav-plans'));
@@ -124,12 +126,12 @@ function renderPlans() {
     if (!container) return;
     container.innerHTML = '';
 
-    if (breedingPlans.length === 0) {
+    if (!window.breedingPlans || window.breedingPlans.length === 0) {
         container.innerHTML = '<div style="color:#888; padding:20px;">No calculation profiles currently configured. Search a species in the Breeding Lab to establish one.</div>';
         return;
     }
 
-    breedingPlans.forEach(plan => {
+    window.breedingPlans.forEach(plan => {
         const card = document.createElement('div');
         card.className = 'plan-card';
         card.style.minWidth = '420px';
@@ -231,7 +233,7 @@ function renderPlans() {
 }
 
 function deletePlan(id) {
-    breedingPlans = breedingPlans.filter(p => p.id !== id);
-    localStorage.setItem('breeding_plans', JSON.stringify(breedingPlans));
+    window.breedingPlans = window.breedingPlans.filter(p => p.id !== id);
+    localStorage.setItem('breeding_plans', JSON.stringify(window.breedingPlans));
     renderPlans();
 }

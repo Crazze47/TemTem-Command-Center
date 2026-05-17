@@ -1,5 +1,6 @@
 // --- APPLICATION PERSISTENCE & HANDLERS (app_logic.js) ---
 
+// Ensure these are at the very top of app_logic.js
 let ftData = JSON.parse(localStorage.getItem('ft_data') || '[]');
 let ftActiveIdx = parseInt(localStorage.getItem('ft_active_idx') || '0');
 let ftStartTime = localStorage.getItem('ft_start_time') ? parseInt(localStorage.getItem('ft_start_time')) : null;
@@ -8,7 +9,8 @@ let ftClockInterval = null;
 let breedingStock = JSON.parse(localStorage.getItem('breeding_stock') || '[]');
 let editingStockId = null; 
 
-let breedingPlans = JSON.parse(localStorage.getItem('breeding_plans') || '[]');
+// This needs to be globally available before breeding_engine runs
+window.breedingPlans = JSON.parse(localStorage.getItem('breeding_plans') || '[]');
 let miscTasks = JSON.parse(localStorage.getItem('misc_tasks') || '[]');
 let isBreedingFiltered = false;
 
