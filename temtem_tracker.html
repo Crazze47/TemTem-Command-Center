@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Temtem Command Center</title>
+    <style>
+        :root { --primary: #ff3e3e; --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --sidebar: #181818; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 220px; background: var(--sidebar); border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px 0; }
+        .sidebar-header { color: var(--primary); font-weight: bold; font-size: 18px; padding: 0 20px 20px 20px; border-bottom: 1px solid #333; margin-bottom: 10px; }
+        .nav-item { padding: 15px 20px; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; color: #888; font-size: 14px; }
+        .nav-item:hover { background: #252525; color: white; }
+        .nav-item.active { background: #252525; color: white; border-left: 4px solid var(--primary); font-weight: bold; }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; }
+        .content-card { background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; max-width: 520px; height: fit-content; }
+        .view { display: none; }
+        .view.active { display: block; }
+
+        h2 { color: var(--primary); margin-top: 0; font-size: 22px; }
+        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; margin: 5px 0; }
+        .btn-red { background: var(--primary); color: white; width: 100%; }
+        
+        .check-item { display: flex; align-items: center; background: #252525; padding: 10px; margin-bottom: 6px; border-radius: 6px; text-align: left; font-size: 14px; }
+        .check-item input[type="checkbox"] { margin-right: 15px; transform: scale(1.2); cursor: pointer; }
+        .check-cat { font-size: 11px; color: var(--primary); margin: 20px 0 8px 0; text-transform: uppercase; font-weight: bold; text-align: left; letter-spacing: 1px; }
+
+        .misc-input-row { display: flex; gap: 10px; margin-top: 15px; }
+        .delete-btn { margin-left: auto; color: #555; cursor: pointer; font-size: 12px; border: none; background: none; }
+        .delete-btn:hover { color: var(--primary); }
+
+        .setup-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px; text-align: left; }
+        label { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
+        .timers { display: flex; justify-content: space-around; background: #161616; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .timer-val { font-size: 24px; font-family: monospace; font-weight: bold; }
+        .timer-label { font-size: 10px; color: #888; text-transform: uppercase; }
+        .progress-container { background: #333; border-radius: 10px; height: 15px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { background: var(--primary); height: 100%; width: 0%; transition: 0.3s; }
+        .btn-blue { background: #3498db; color: white; flex: 1; text-decoration: none; text-align: center; }
+        .btn-green { background: #2ecc71; color: white; flex: 1; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; overflow-x: auto; }
+        .tab { flex: 1; padding: 10px; background: #333; border-radius: 5px; cursor: pointer; font-size: 12px; text-align: center; }
+        .tab.active { background: var(--primary); font-weight: bold; }
+
+        /* Dex Table Styles */
+        .dex-container { max-height: 500px; overflow-y: auto; background: #161616; border-radius: 8px; border: 1px solid #333; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        thead { position: sticky; top: 0; background: var(--primary); color: white; z-index: 10; }
+        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #222; }
+        th:first-child, td:first-child { text-align: left; padding-left: 15px; }
+        tr:hover { background: #1e1e1e; }
+        #dex-search, #breed-search { width: 100%; padding: 10px; margin-bottom: 15px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
+
+        /* Breeding Modal Styles */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+        .modal-content { background: #1a1a1a; margin: 10% auto; padding: 25px; border: 2px solid var(--primary); width: 400px; border-radius: 12px; box-shadow: 0 0 20px rgba(255, 62, 62, 0.3); }
+        .sv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; background: #222; padding: 15px; border-radius: 8px; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .stock-list { margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; }
+        .stock-item { background: #252525; padding: 15px; border-radius: 8px; margin-bottom: 10px; position: relative; border-left: 4px solid var(--primary); }
+        .stock-item h4 { margin: 0 0 5px 0; color: var(--primary); }
+        .stock-details { font-size: 12px; color: #bbb; line-height: 1.6; }
+        .sv-tag { background: #444; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">TEM COMMAND</div>
+    <div class="nav-item active" onclick="showView('freetem-view', this)">FreeTem Tracker</div>
+    <div class="nav-item" onclick="showView('daily-view', this)">Daily Tasks</div>
+    <div class="nav-item" onclick="showView('weekly-view', this)">Weekly Checklist</div>
+    <div class="nav-item" onclick="showView('dex-view', this)">Master TemDeck</div>
+    <div class="nav-item" onclick="showView('breeding-view', this)">Breeding Lab</div>
+    <div class="nav-item" onclick="showView('goals-view', this)">General Goals</div>
+</div>
+
+<div class="main-content">
+    <!-- FREETEM VIEW -->
+    <div id="freetem-view" class="content-card view active">
+        <h2>FreeTem Hunting</h2>
+        <div id="ft-setup">
+            <div id="setup-list">
+                <div class="setup-row"><div><label>Species</label><input type="text" class="tem-name" placeholder="Species 1"></div><div><label>Goal</label><input type="number" class="tem-goal" placeholder="0"></div></div>
+                <div class="setup-row"><div><label>Species</label><input type="text" class="tem-name" placeholder="Species 2"></div><div><label>Goal</label><input type="number" class="tem-goal" placeholder="0"></div></div>
+                <div class="setup-row"><div><label>Species</label><input type="text" class="tem-name" placeholder="Species 3"></div><div><label>Goal</label><input type="number" class="tem-goal" placeholder="0"></div></div>
+                <div class="setup-row"><div><label>Species</label><input type="text" class="tem-name" placeholder="Species 4"></div><div><label>Goal</label><input type="number" class="tem-goal" placeholder="0"></div></div>
+            </div>
+            <button class="btn btn-red" onclick="startFreeTem()">Start Session</button>
+        </div>
+        <div id="ft-main" style="display:none;">
+            <div id="tab-container" class="tabs"></div>
+            <h3 id="cur-tem" style="margin: 0;">---</h3>
+            <div class="timers">
+                <div><div class="timer-label">Live Clock</div><div id="live-clock" class="timer-val">00:00</div></div>
+                <div><div class="timer-label">Last Span</div><div id="last-span" class="timer-val" style="color:#3498db">--:--</div></div>
+            </div>
+            <div id="ft-count" style="font-size:14px; color:#aaa;">0 / 0 (0%)</div>
+            <div class="progress-container"><div id="ft-progress" class="progress-bar"></div></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-blue" onclick="logFT(1)">+1 Tem</button>
+                <button class="btn btn-green" onclick="logFT(2)">+2 Tems</button>
+            </div>
+            <div style="margin-top:15px; font-size:13px; color:#888;">Avg Encounter: <span id="ft-avg" style="color:var(--primary)">0s</span></div>
+            <button onclick="location.reload()" style="background:none; border:none; color:#555; text-decoration:underline; font-size:11px; margin-top:20px; cursor:pointer;">Reset Tracker</button>
+        </div>
+    </div>
+
+    <!-- DAILY VIEW -->
+    <div id="daily-view" class="content-card view">
+        <h2>Daily Logistics</h2>
+        <div class="check-cat">Postal Service Deliveries</div>
+        <div id="daily-checks">
+            <div class="check-item"><input type="checkbox" class="save-state" id="p_mon"> <span>Monday Delivery</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="p_tue"> <span>Tuesday Delivery</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="p_wed"> <span>Wednesday Delivery</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="p_thu"> <span>Thursday Delivery</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="p_fri"> <span>Friday Delivery</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="p_sat"> <span>Saturday Delivery</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="p_sun"> <span>Sunday Delivery</span></div>
+        </div>
+    </div>
+
+    <!-- WEEKLY VIEW -->
+    <div id="weekly-view" class="content-card view">
+        <h2>Weekly Checklist</h2>
+        <div class="check-cat">Dojo Rematches</div>
+        <div id="weekly-dojos">
+            <div class="check-item"><input type="checkbox" class="save-state" id="d_ari"> <span>Arissola Dojo (Sophia)</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="d_mok"> <span>Mokupuni Dojo (Rawiri)</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="d_nan"> <span>Nanga Dojo (Tihani)</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="d_que"> <span>Quetzal Dojo (Yareni)</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="d_vum"> <span>Vumbi Dojo (Musa)</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="d_neo"> <span>Neoedo Dojo (Dr. Sasaya)</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="d_loc"> <span>Lochburg Dojo (Murdag)</span></div>
+            <div class="check-item"><input type="checkbox" class="save-state" id="d_pro"> <span>Properton Dojo (Percival)</span></div>
+        </div>
+        <div class="check-cat">Lairs</div>
+        <div class="check-item"><input type="checkbox" class="save-state" id="l_ana"> <span>Mythic Lair: Anak</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state" id="l_hig"> <span>Mythic Lair: Highabove</span></div>
+        <div class="check-cat">Koish Fishing</div>
+        <div class="check-item"><input type="checkbox" class="save-state" id="k_45"> <span>4/5 Match</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state" id="k_55"> <span>5/5 Match</span></div>
+        <div class="check-cat">Saipark</div>
+        <div class="check-item"><input type="checkbox" class="save-state" id="s_luma"> <span>Luma Caught (Weekly Rate)</span></div>
+    </div>
+
+    <!-- MASTER TEMDECK VIEW -->
+    <div id="dex-view" class="content-card view" style="max-width: 800px;">
+        <h2>Master TemDeck</h2>
+        <input type="text" id="dex-search" placeholder="Search species..." onkeyup="filterDex()">
+        <div class="dex-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Species</th>
+                        <th>Caught</th>
+                        <th>Luma</th>
+                        <th>Umbra</th>
+                        <th>Perfect</th>
+                    </tr>
+                </thead>
+                <tbody id="dex-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- BREEDING LAB VIEW -->
+    <div id="breeding-view" class="content-card view">
+        <h2>Breeding Lab</h2>
+        <div class="misc-input-row">
+            <input type="text" id="breed-search" list="temList" placeholder="Enter species name to add stock...">
+            <button class="btn btn-red" onclick="openBreedingModal()" style="margin:0; width:80px;">Add</button>
+        </div>
+        
+        <div class="stock-list" id="breeding-stock-list">
+            <!-- Stock items will appear here -->
+        </div>
+    </div>
+
+    <!-- GENERAL GOALS VIEW -->
+    <div id="goals-view" class="content-card view">
+        <h2>General Goals</h2>
+        <div class="check-cat">Shrine Quests</div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_wat"> <span>Water Shrine - Aquamarina Caves (Tukai)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_fir"> <span>Fire Shrine - Anak Vulcano (Tulcan)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_ear"> <span>Earth Shrine - Chini Grotto (Turoc)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_cry"> <span>Crystal Shrine - Corrupted Badlands (Tuvine)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_dig"> <span>Digital Shrine - Neoedo (Tuwire)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_mel"> <span>Melee Shrine - Mudshire Cromlech (Tutsu)</span></div>
+
+        <div class="check-cat">Misc / Dynamic Tasks</div>
+        <div id="misc-list"></div>
+        <div class="misc-input-row">
+            <input type="text" id="misc-input" placeholder="Enter custom task...">
+            <button class="btn btn-red" onclick="addMiscTask()" style="margin:0; width:80px;">Add</button>
+        </div>
+    </div>
+</div>
+
+<!-- Breeding Modal -->
+<div id="breedingModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTemName" style="margin-bottom:5px;">Species</h2>
+        <div style="margin-bottom:15px;">
+            <label>Gender</label>
+            <select id="breed-gender" style="width:100%; padding:8px; background:#2a2a2a; color:white; border:1px solid #444; border-radius:5px;">
+                <option value="Male">♂ Male</option>
+                <option value="Female">♀ Female</option>
+            </select>
+        </div>
+        <label>Select 50 SVs</label>
+        <div class="sv-grid">
+            <label><input type="checkbox" class="sv-check" value="HP"> HP</label>
+            <label><input type="checkbox" class="sv-check" value="STA"> STA</label>
+            <label><input type="checkbox" class="sv-check" value="SPD"> SPD</label>
+            <label><input type="checkbox" class="sv-check" value="ATK"> ATK</label>
+            <label><input type="checkbox" class="sv-check" value="DEF"> DEF</label>
+            <label><input type="checkbox" class="sv-check" value="SPATK"> SPATK</label>
+            <label><input type="checkbox" class="sv-check" value="SPDEF"> SPDEF</label>
+        </div>
+        <div class="setup-row" style="grid-template-columns: 1fr 1fr;">
+            <div><label>Fertility</label><input type="number" id="breed-fert" value="8" min="0" max="8"></div>
+            <div><label>Egg Moves</label><input type="text" id="breed-moves" placeholder="e.g. Bait"></div>
+        </div>
+        <div class="modal-btns">
+            <button class="btn btn-red" onclick="saveBreedingStock()">Save to Vault</button>
+            <button class="btn" style="background:#444; color:white; flex:1;" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<datalist id="temList"></datalist>
+
+<script>
+    const temNames = ["Mimit","Oree","Zaobian","Chromeon","Halzhi","Molgu","Platypet","Platox","Platimous","Swali","Loali","Tateru","Gharunder","Mosu","Magmut","Paharo","Paharac","Granpah","Ampling","Amphatyr","Bunbun","Mudrid","Hidody","Taifu","Fomu","Wiplump","Skail","Skunch","Goty","Mouflank","Rhoulder","Houchic","Tental","Nagaise","Orphyll","Nidrasil","Banapi","Capyre","Lapinite","Azuroc","Zenoreth","Reval","Aohi","Bigu","Babawa","0b1","0b10","Kaku","Saku","Valash","Towly","Owlhe","Barnshe","Gyalis","Occlura","Myx","Raiber","Raize","Raican","Pewki","Piraniant","Scarawatt","Scaravolt","Hoglip","Hedgine","Osuchi","Osukan","Osukai","Saipat","Pycko","Drakash","Crystle","Sherald","Tortenite","Innki","Shaolite","Shaolant","Cycrox","Hocus","Pocus","Smolzy","Sparzy","Golzy","Mushi","Mushook","Magmis","Mastione","Umishi","Ukama","Galvanid","Raignet","Smazee","Baboong","Seismunch","Zizare","Gorong","Mitty","Sanbi","Momo","Kuri","Kauren","Spriole","Deendre","Cerneaf","Toxolotl","Noxolotl","Blooze","Goolder","Zephyruff","Volarend","Grumvel","Grumper","Ganki","Gazuma","Oceara","Yowlar","Droply","Garyo","Broccoblin","Broccorc","Broccolem","Shuine","Nessla","Valiar","Pupoise","Loatle","Kalazu","Kalabyss","Adoroboros","Tuwai","Tukai","Tulcan","Tuvine","Turoc","Tuwire","Tutsu","Kinu","Vulvir","Vulor","Vulcrane","Pigepic","Akranox","Koish","Vulffy","Chubee","Waspeen","Mawtle","Mawmense","Hazrat","Minttle","Minox","Minothor","Maoala","Venx","Venmet","Vental","Chimurian","Arachnyte","Thaiko","Monkko","Anahir","Anatan","Tyranak","Volgon","Galios"];
+
+    function initPersistence() {
+        populateDatalist();
+        renderDex();
+        document.querySelectorAll('.save-state, .save-state-perm').forEach(cb => {
+            cb.checked = localStorage.getItem(cb.id) === 'true';
+            cb.onchange = () => localStorage.setItem(cb.id, cb.checked);
+        });
+        renderMisc();
+        renderBreedingStock();
+    }
+
+    function populateDatalist() {
+        const list = document.getElementById('temList');
+        temNames.forEach(name => {
+            let opt = document.createElement('option');
+            opt.value = name;
+            list.appendChild(opt);
+        });
+    }
+
+    /* BREEDING LOGIC */
+    let breedingStock = JSON.parse(localStorage.getItem('breeding_stock') || '[]');
+
+    function openBreedingModal() {
+        const name = document.getElementById('breed-search').value;
+        if (!temNames.includes(name)) return alert("Select a valid Temtem from the list.");
+        document.getElementById('modalTemName').innerText = name;
+        document.getElementById('breedingModal').style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById('breedingModal').style.display = "none";
+        document.querySelectorAll('.sv-check').forEach(cb => cb.checked = false);
+        document.getElementById('breed-moves').value = "";
+    }
+
+    function saveBreedingStock() {
+        const name = document.getElementById('modalTemName').innerText;
+        const gender = document.getElementById('breed-gender').value;
+        const fert = document.getElementById('breed-fert').value;
+        const moves = document.getElementById('breed-moves').value;
+        const svs = Array.from(document.querySelectorAll('.sv-check:checked')).map(cb => cb.value);
+
+        const newEntry = { id: Date.now(), name, gender, fert, moves, svs };
+        breedingStock.push(newEntry);
+        localStorage.setItem('breeding_stock', JSON.stringify(breedingStock));
+        renderBreedingStock();
+        closeModal();
+        document.getElementById('breed-search').value = "";
+    }
+
+    function deleteStock(id) {
+        breedingStock = breedingStock.filter(s => s.id !== id);
+        localStorage.setItem('breeding_stock', JSON.stringify(breedingStock));
+        renderBreedingStock();
+    }
+
+    function renderBreedingStock() {
+        const list = document.getElementById('breeding-stock-list');
+        list.innerHTML = '';
+        breedingStock.forEach(s => {
+            const item = document.createElement('div');
+            item.className = 'stock-item';
+            item.innerHTML = `
+                <button class="delete-btn" onclick="deleteStock(${s.id})" style="position:absolute; right:15px; top:15px;">Remove</button>
+                <h4>${s.name} (${s.gender === 'Male' ? '♂' : '♀'})</h4>
+                <div class="stock-details">
+                    <div>Fertility: ${s.fert}/8</div>
+                    <div>SVs: ${s.svs.map(sv => `<span class="sv-tag">${sv}</span>`).join('') || 'None'}</div>
+                    <div style="margin-top:5px; font-style:italic;">Moves: ${s.moves || 'None'}</div>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    /* DEX LOGIC */
+    function renderDex() {
+        const tbody = document.getElementById('dex-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        temNames.forEach((name, index) => {
+            const num = (index + 1).toString().padStart(3, '0');
+            const id = name.toLowerCase().replace(/\s/g, '');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span style="color:#666; margin-right:8px;">#${num}</span> ${name}</td>
+                <td><input type="checkbox" class="save-state-perm" id="c_${id}"></td>
+                <td><input type="checkbox" class="save-state-perm" id="l_${id}"></td>
+                <td><input type="checkbox" class="save-state-perm" id="u_${id}"></td>
+                <td><input type="checkbox" class="save-state-perm" id="p_${id}"></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filterDex() {
+        const query = document.getElementById('dex-search').value.toLowerCase();
+        const rows = document.querySelectorAll('#dex-body tr');
+        rows.forEach(row => {
+            const name = row.cells[0].innerText.toLowerCase();
+            row.style.display = name.includes(query) ? '' : 'none';
+        });
+    }
+
+    /* MISC TASK LOGIC */
+    let miscTasks = JSON.parse(localStorage.getItem('misc_tasks') || '[]');
+    function addMiscTask() {
+        const input = document.getElementById('misc-input');
+        if (!input.value.trim()) return;
+        const newTask = { id: 'm_' + Date.now(), text: input.value, checked: false };
+        miscTasks.push(newTask);
+        saveMisc();
+        input.value = '';
+        renderMisc();
+    }
+    function toggleMisc(id) {
+        const task = miscTasks.find(t => t.id === id);
+        if (task) task.checked = !task.checked;
+        saveMisc();
+    }
+    function deleteMisc(id) {
+        miscTasks = miscTasks.filter(t => t.id !== id);
+        saveMisc();
+        renderMisc();
+    }
+    function saveMisc() { localStorage.setItem('misc_tasks', JSON.stringify(miscTasks)); }
+    function renderMisc() {
+        const list = document.getElementById('misc-list');
+        list.innerHTML = '';
+        miscTasks.forEach(t => {
+            const item = document.createElement('div');
+            item.className = 'check-item';
+            item.innerHTML = `
+                <input type="checkbox" ${t.checked ? 'checked' : ''} onchange="toggleMisc('${t.id}')">
+                <span>${t.text}</span>
+                <button class="delete-btn" onclick="deleteMisc('${t.id}')">Remove</button>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    /* UI NAVIGATION */
+    function showView(viewId, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        el.classList.add('active');
+    }
+
+    /* FREETEM LOGIC */
+    let ftData = [];
+    let ftActiveIdx = 0;
+    let ftStartTime = null;
+    let ftClockInterval = null;
+
+    function startFreeTem() {
+        const names = document.querySelectorAll('.tem-name');
+        const goals = document.querySelectorAll('.tem-goal');
+        names.forEach((n, i) => {
+            if(n.value.trim() !== "" && goals[i].value > 0) {
+                ftData.push({ name: n.value, goal: parseInt(goals[i].value), count: 0, times: [], lastSpan: "--:--" });
+            }
+        });
+        if(ftData.length === 0) return alert("Enter at least one Tem.");
+        document.getElementById('ft-setup').style.display = 'none';
+        document.getElementById('ft-main').style.display = 'block';
+        renderFTTabs();
+        updateFTUI();
+    }
+
+    function renderFTTabs() {
+        const container = document.getElementById('tab-container');
+        container.innerHTML = '';
+        ftData.forEach((d, i) => {
+            const t = document.createElement('div');
+            t.className = `tab ${i === ftActiveIdx ? 'active' : ''}`;
+            t.innerText = d.name;
+            t.onclick = () => { ftActiveIdx = i; renderFTTabs(); updateFTUI(); };
+            container.appendChild(t);
+        });
+    }
+
+    function logFT(amt) {
+        const now = Date.now();
+        let cur = ftData[ftActiveIdx];
+        if(cur.count >= cur.goal) return;
+        if(ftStartTime) {
+            const diff = Math.floor((now - ftStartTime) / 1000);
+            cur.lastSpan = `${Math.floor(diff/60).toString().padStart(2,'0')}:${(diff%60).toString().padStart(2,'0')}`;
+        } else {
+            ftClockInterval = setInterval(() => {
+                if(!ftStartTime) return;
+                const elapsed = Math.floor((Date.now() - ftStartTime) / 1000);
+                document.getElementById('live-clock').innerText = `${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+        cur.count += amt;
+        if(cur.count > cur.goal) cur.count = cur.goal;
+        cur.times.push(now);
+        ftStartTime = now;
+        updateFTUI();
+    }
+
+    function updateFTUI() {
+        let cur = ftData[ftActiveIdx];
+        const perc = (cur.count / cur.goal) * 100;
+        document.getElementById('cur-tem').innerText = cur.name;
+        document.getElementById('ft-count').innerText = `${cur.count} / ${cur.goal} (${perc.toFixed(1)}%)`;
+        document.getElementById('ft-progress').style.width = perc + '%';
+        document.getElementById('last-span').innerText = cur.lastSpan;
+        if(cur.times.length > 1) {
+            const total = (cur.times[cur.times.length-1] - cur.times[0]) / 1000;
+            const avg = total / (cur.times.length-1);
+            document.getElementById('ft-avg').innerText = `${Math.floor(avg/60)}m ${Math.floor(avg%60)}s`;
+        }
+    }
+
+    function checkWeeklyReset() {
+        const now = new Date();
+        const lastReset = localStorage.getItem('lastResetDate');
+        const day = now.getDay(); 
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+        const startOfWeek = new Date(now.setDate(diff));
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        if (!lastReset || new Date(lastReset) < startOfWeek) {
+            document.querySelectorAll('.save-state').forEach(cb => {
+                cb.checked = false;
+                localStorage.setItem(cb.id, false);
+            });
+            localStorage.setItem('lastResetDate', startOfWeek.toISOString());
+            location.reload(); 
+        }
+    }
+
+    initPersistence();
+    checkWeeklyReset();
+</script>
+</body>
+</html>
