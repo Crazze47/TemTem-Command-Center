@@ -3,67 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Temtem Command Center</title>
-    <style>
-        :root { --primary: #ff3e3e; --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --sidebar: #181818; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        .sidebar { width: 220px; background: var(--sidebar); border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px 0; }
-        .sidebar-header { color: var(--primary); font-weight: bold; font-size: 18px; padding: 0 20px 20px 20px; border-bottom: 1px solid #333; margin-bottom: 10px; }
-        .nav-item { padding: 15px 20px; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; color: #888; font-size: 14px; }
-        .nav-item:hover { background: #252525; color: white; }
-        .nav-item.active { background: #252525; color: white; border-left: 4px solid var(--primary); font-weight: bold; }
-
-        .main-content { flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; }
-        .content-card { background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; max-width: 520px; height: fit-content; }
-        .view { display: none; }
-        .view.active { display: block; }
-
-        h2 { color: var(--primary); margin-top: 0; font-size: 22px; }
-        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; margin: 5px 0; }
-        .btn-red { background: var(--primary); color: white; width: 100%; }
-        
-        .check-item { display: flex; align-items: center; background: #252525; padding: 10px; margin-bottom: 6px; border-radius: 6px; text-align: left; font-size: 14px; }
-        .check-item input[type="checkbox"] { margin-right: 15px; transform: scale(1.2); cursor: pointer; }
-        .check-cat { font-size: 11px; color: var(--primary); margin: 20px 0 8px 0; text-transform: uppercase; font-weight: bold; text-align: left; letter-spacing: 1px; }
-
-        .misc-input-row { display: flex; gap: 10px; margin-top: 15px; }
-        .delete-btn { margin-left: auto; color: #555; cursor: pointer; font-size: 12px; border: none; background: none; }
-        .delete-btn:hover { color: var(--primary); }
-
-        .setup-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px; text-align: left; }
-        label { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
-        .timers { display: flex; justify-content: space-around; background: #161616; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        .timer-val { font-size: 24px; font-family: monospace; font-weight: bold; }
-        .timer-label { font-size: 10px; color: #888; text-transform: uppercase; }
-        .progress-container { background: #333; border-radius: 10px; height: 15px; margin: 15px 0; overflow: hidden; }
-        .progress-bar { background: var(--primary); height: 100%; width: 0%; transition: 0.3s; }
-        .btn-blue { background: #3498db; color: white; flex: 1; text-decoration: none; text-align: center; }
-        .btn-green { background: #2ecc71; color: white; flex: 1; }
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; overflow-x: auto; }
-        .tab { flex: 1; padding: 10px; background: #333; border-radius: 5px; cursor: pointer; font-size: 12px; text-align: center; }
-        .tab.active { background: var(--primary); font-weight: bold; }
-
-        /* Dex Table Styles */
-        .dex-container { max-height: 500px; overflow-y: auto; background: #161616; border-radius: 8px; border: 1px solid #333; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        thead { position: sticky; top: 0; background: var(--primary); color: white; z-index: 10; }
-        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #222; }
-        th:first-child, td:first-child { text-align: left; padding-left: 15px; }
-        tr:hover { background: #1e1e1e; }
-        #dex-search, #breed-search { width: 100%; padding: 10px; margin-bottom: 15px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
-
-        /* Breeding Modal Styles */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
-        .modal-content { background: #1a1a1a; margin: 10% auto; padding: 25px; border: 2px solid var(--primary); width: 400px; border-radius: 12px; box-shadow: 0 0 20px rgba(255, 62, 62, 0.3); }
-        .sv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; background: #222; padding: 15px; border-radius: 8px; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .stock-list { margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; }
-        .stock-item { background: #252525; padding: 15px; border-radius: 8px; margin-bottom: 10px; position: relative; border-left: 4px solid var(--primary); }
-        .stock-item h4 { margin: 0 0 5px 0; color: var(--primary); }
-        .stock-details { font-size: 12px; color: #bbb; line-height: 1.6; }
-        .sv-tag { background: #444; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 4px; }
-    </style>
+	<script src="tem_database.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -74,12 +15,13 @@
     <div class="nav-item" onclick="showView('weekly-view', this)">Weekly Checklist</div>
     <div class="nav-item" onclick="showView('dex-view', this)">Master TemDeck</div>
     <div class="nav-item" onclick="showView('breeding-view', this)">Breeding Lab</div>
+    <div class="nav-item" id="nav-plans" onclick="showView('plans-view', this)">Breeding Plans</div>
     <div class="nav-item" onclick="showView('goals-view', this)">General Goals</div>
 </div>
 
 <div class="main-content">
-    <!-- FREETEM VIEW -->
     <div id="freetem-view" class="content-card view active">
+        <div class="debug-bar" id="ft-status">Status: No Session</div>
         <h2>FreeTem Hunting</h2>
         <div id="ft-setup">
             <div id="setup-list">
@@ -97,18 +39,20 @@
                 <div><div class="timer-label">Live Clock</div><div id="live-clock" class="timer-val">00:00</div></div>
                 <div><div class="timer-label">Last Span</div><div id="last-span" class="timer-val" style="color:#3498db">--:--</div></div>
             </div>
-            <div id="ft-count" style="font-size:14px; color:#aaa;">0 / 0 (0%)</div>
+            <div class="timers" style="margin-top: 5px;">
+                <div><div class="timer-label">Avg Encounter</div><div id="ft-avg" class="timer-val" style="color:var(--primary)">0s</div></div>
+                <div><div class="timer-label">Est. Finish</div><div id="ft-finish" class="timer-val" style="color:#2ecc71">--:--</div></div>
+            </div>
+            <div id="ft-count" style="font-size:14px; color:#aaa; margin-top: 10px;">0 / 0 (0%)</div>
             <div class="progress-container"><div id="ft-progress" class="progress-bar"></div></div>
             <div style="display:flex; gap:10px;">
                 <button class="btn btn-blue" onclick="logFT(1)">+1 Tem</button>
                 <button class="btn btn-green" onclick="logFT(2)">+2 Tems</button>
             </div>
-            <div style="margin-top:15px; font-size:13px; color:#888;">Avg Encounter: <span id="ft-avg" style="color:var(--primary)">0s</span></div>
-            <button onclick="location.reload()" style="background:none; border:none; color:#555; text-decoration:underline; font-size:11px; margin-top:20px; cursor:pointer;">Reset Tracker</button>
+            <button onclick="resetFreeTemTracker()" style="background:none; border:none; color:#555; text-decoration:underline; font-size:11px; margin-top:20px; cursor:pointer;">Reset Tracker</button>
         </div>
     </div>
 
-    <!-- DAILY VIEW -->
     <div id="daily-view" class="content-card view">
         <h2>Daily Logistics</h2>
         <div class="check-cat">Postal Service Deliveries</div>
@@ -123,7 +67,6 @@
         </div>
     </div>
 
-    <!-- WEEKLY VIEW -->
     <div id="weekly-view" class="content-card view">
         <h2>Weekly Checklist</h2>
         <div class="check-cat">Dojo Rematches</div>
@@ -147,51 +90,50 @@
         <div class="check-item"><input type="checkbox" class="save-state" id="s_luma"> <span>Luma Caught (Weekly Rate)</span></div>
     </div>
 
-    <!-- MASTER TEMDECK VIEW -->
     <div id="dex-view" class="content-card view" style="max-width: 800px;">
         <h2>Master TemDeck</h2>
         <input type="text" id="dex-search" placeholder="Search species..." onkeyup="filterDex()">
         <div class="dex-container">
             <table>
                 <thead>
-                    <tr>
-                        <th>Species</th>
-                        <th>Caught</th>
-                        <th>Luma</th>
-                        <th>Umbra</th>
-                        <th>Perfect</th>
-                    </tr>
+                    <tr><th>Species</th><th>Caught</th><th>Luma</th><th>Umbra</th><th>Perfect</th></tr>
                 </thead>
                 <tbody id="dex-body"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- BREEDING LAB VIEW -->
     <div id="breeding-view" class="content-card view">
         <h2>Breeding Lab</h2>
-        <div class="misc-input-row">
-            <input type="text" id="breed-search" list="temList" placeholder="Enter species name to add stock...">
-            <button class="btn btn-red" onclick="openBreedingModal()" style="margin:0; width:80px;">Add</button>
+        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin-bottom: 10px;">
+            <input type="text" id="master-breed-search" list="temList" placeholder="Enter species to vault, plan, or filter...">
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-red" onclick="openBreedingModal()" style="margin:0; flex: 1;">Add</button>
+                <button class="btn btn-blue" onclick="createPlan()" style="margin:0; flex: 1;">Create Plan</button>
+                <button class="btn" id="breedFilterBtn" onclick="toggleBreedingFilter()" style="margin:0; flex: 1; background: #2ecc71; color: white;">Filter View</button>
+            </div>
         </div>
         
-        <div class="stock-list" id="breeding-stock-list">
-            <!-- Stock items will appear here -->
-        </div>
+        <div class="stock-list" id="breeding-stock-list" style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 15px; overflow-y: auto; align-content: flex-start; padding-right: 10px;"></div>
     </div>
 
-    <!-- GENERAL GOALS VIEW -->
+    <div id="plans-view" class="content-card view">
+        <h2>Breeding Plans</h2>
+        <div id="plans-container" style="display:flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; align-items: flex-start;"></div>
+    </div>
+
     <div id="goals-view" class="content-card view">
         <h2>General Goals</h2>
         <div class="check-cat">Shrine Quests</div>
-        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_wat"> <span>Water Shrine - Aquamarina Caves (Tukai)</span></div>
-        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_fir"> <span>Fire Shrine - Anak Vulcano (Tulcan)</span></div>
-        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_ear"> <span>Earth Shrine - Chini Grotto (Turoc)</span></div>
-        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_cry"> <span>Crystal Shrine - Corrupted Badlands (Tuvine)</span></div>
-        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_dig"> <span>Digital Shrine - Neoedo (Tuwire)</span></div>
-        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_mel"> <span>Melee Shrine - Mudshire Cromlech (Tutsu)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_wat"> <span>Water Shrine (Tukai)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_fir"> <span>Fire Shrine (Tulcan)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_ear"> <span>Earth Shrine (Turoc)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_cry"> <span>Crystal Shrine (Tuvine)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_dig"> <span>Digital Shrine (Tuwire)</span></div>
+        <div class="check-item"><input type="checkbox" class="save-state-perm" id="s_mel"> <span>Melee Shrine (Tutsu)</span></div>
 
-        <div class="check-cat">Misc / Dynamic Tasks</div>
+        <div class="check-cat">Misc Tasks</div>
         <div id="misc-list"></div>
         <div class="misc-input-row">
             <input type="text" id="misc-input" placeholder="Enter custom task...">
@@ -200,19 +142,28 @@
     </div>
 </div>
 
-<!-- Breeding Modal -->
 <div id="breedingModal" class="modal">
     <div class="modal-content">
-        <h2 id="modalTemName" style="margin-bottom:5px;">Species</h2>
-        <div style="margin-bottom:15px;">
-            <label>Gender</label>
-            <select id="breed-gender" style="width:100%; padding:8px; background:#2a2a2a; color:white; border:1px solid #444; border-radius:5px;">
-                <option value="Male">♂ Male</option>
-                <option value="Female">♀ Female</option>
-            </select>
+        <h2 id="modalTemName" class="modal-header">Species</h2>
+        
+        <div class="setup-row" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px;">
+            <div>
+                <label>Gender</label>
+                <select id="breed-gender" style="width:100%; padding:8px; background:#2a2a2a; color:white; border:1px solid #444; border-radius:5px;">
+                    <option value="Male">♂ Male</option>
+                    <option value="Female">♀ Female</option>
+                </select>
+            </div>
+            <div>
+                <label>Fertility</label>
+                <input type="number" id="breed-fert" value="8" min="0" max="8">
+            </div>
         </div>
-        <label>Select 50 SVs</label>
-        <div class="sv-grid">
+
+        <div id="modal-luma-container"></div>
+
+        <label>SVs</label>
+        <div class="sv-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 15px;">
             <label><input type="checkbox" class="sv-check" value="HP"> HP</label>
             <label><input type="checkbox" class="sv-check" value="STA"> STA</label>
             <label><input type="checkbox" class="sv-check" value="SPD"> SPD</label>
@@ -221,13 +172,16 @@
             <label><input type="checkbox" class="sv-check" value="SPATK"> SPATK</label>
             <label><input type="checkbox" class="sv-check" value="SPDEF"> SPDEF</label>
         </div>
-        <div class="setup-row" style="grid-template-columns: 1fr 1fr;">
-            <div><label>Fertility</label><input type="number" id="breed-fert" value="8" min="0" max="8"></div>
-            <div><label>Egg Moves</label><input type="text" id="breed-moves" placeholder="e.g. Bait"></div>
-        </div>
+        
+        <label>Egg Moves</label>
+        <div id="modal-egg-moves" class="sv-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 15px;"></div>
+        
+        <label>Parent Moves</label>
+        <div id="modal-parent-moves" class="sv-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 15px;"></div>
+
         <div class="modal-btns">
-            <button class="btn btn-red" onclick="saveBreedingStock()">Save to Vault</button>
-            <button class="btn" style="background:#444; color:white; flex:1;" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-red" onclick="saveBreedingStock()" style="flex:2; margin:0;">Save</button>
+            <button class="btn" style="background:#444; color:white; flex:1; margin:0;" onclick="closeModal()">Cancel</button>
         </div>
     </div>
 </div>
@@ -235,7 +189,20 @@
 <datalist id="temList"></datalist>
 
 <script>
-    const temNames = ["Mimit","Oree","Zaobian","Chromeon","Halzhi","Molgu","Platypet","Platox","Platimous","Swali","Loali","Tateru","Gharunder","Mosu","Magmut","Paharo","Paharac","Granpah","Ampling","Amphatyr","Bunbun","Mudrid","Hidody","Taifu","Fomu","Wiplump","Skail","Skunch","Goty","Mouflank","Rhoulder","Houchic","Tental","Nagaise","Orphyll","Nidrasil","Banapi","Capyre","Lapinite","Azuroc","Zenoreth","Reval","Aohi","Bigu","Babawa","0b1","0b10","Kaku","Saku","Valash","Towly","Owlhe","Barnshe","Gyalis","Occlura","Myx","Raiber","Raize","Raican","Pewki","Piraniant","Scarawatt","Scaravolt","Hoglip","Hedgine","Osuchi","Osukan","Osukai","Saipat","Pycko","Drakash","Crystle","Sherald","Tortenite","Innki","Shaolite","Shaolant","Cycrox","Hocus","Pocus","Smolzy","Sparzy","Golzy","Mushi","Mushook","Magmis","Mastione","Umishi","Ukama","Galvanid","Raignet","Smazee","Baboong","Seismunch","Zizare","Gorong","Mitty","Sanbi","Momo","Kuri","Kauren","Spriole","Deendre","Cerneaf","Toxolotl","Noxolotl","Blooze","Goolder","Zephyruff","Volarend","Grumvel","Grumper","Ganki","Gazuma","Oceara","Yowlar","Droply","Garyo","Broccoblin","Broccorc","Broccolem","Shuine","Nessla","Valiar","Pupoise","Loatle","Kalazu","Kalabyss","Adoroboros","Tuwai","Tukai","Tulcan","Tuvine","Turoc","Tuwire","Tutsu","Kinu","Vulvir","Vulor","Vulcrane","Pigepic","Akranox","Koish","Vulffy","Chubee","Waspeen","Mawtle","Mawmense","Hazrat","Minttle","Minox","Minothor","Maoala","Venx","Venmet","Vental","Chimurian","Arachnyte","Thaiko","Monkko","Anahir","Anatan","Tyranak","Volgon","Galios"];
+    let ftData = JSON.parse(localStorage.getItem('ft_data') || '[]');
+    let ftActiveIdx = parseInt(localStorage.getItem('ft_active_idx') || '0');
+    let ftStartTime = localStorage.getItem('ft_start_time') ? parseInt(localStorage.getItem('ft_start_time')) : null;
+    let ftClockInterval = null;
+    
+    let breedingStock = JSON.parse(localStorage.getItem('breeding_stock') || '[]');
+    let editingStockId = null; 
+
+    let breedingPlans = JSON.parse(localStorage.getItem('breeding_plans') || '[]');
+    
+    let miscTasks = JSON.parse(localStorage.getItem('misc_tasks') || '[]');
+    
+    // Global tracker to handle filter state
+    let isBreedingFiltered = false;
 
     function initPersistence() {
         populateDatalist();
@@ -246,46 +213,270 @@
         });
         renderMisc();
         renderBreedingStock();
+        renderPlans();
+
+        if (ftData && ftData.length > 0) {
+            document.getElementById('ft-status').innerText = "Status: Restored";
+            document.getElementById('ft-setup').style.display = 'none';
+            document.getElementById('ft-main').style.display = 'block';
+            startClock(); 
+            renderFTTabs();
+            updateFTUI();
+        }
     }
 
     function populateDatalist() {
         const list = document.getElementById('temList');
-        temNames.forEach(name => {
+        if(!list) return;
+        Object.keys(TEM_DATABASE).forEach(name => {
             let opt = document.createElement('option');
             opt.value = name;
             list.appendChild(opt);
         });
     }
 
-    /* BREEDING LOGIC */
-    let breedingStock = JSON.parse(localStorage.getItem('breeding_stock') || '[]');
+    function getTypeIcons(typeArray) {
+        if (!typeArray) return "";
+        return typeArray.map(t => `<img src="icons/${t.toLowerCase()}.png" class="type-icon" title="${t}" alt="${t}">`).join('');
+    }
+
+    // --- FREETEM TRACKER LOGIC ---
+    function startFreeTem() {
+        const names = document.querySelectorAll('.tem-name');
+        const goals = document.querySelectorAll('.tem-goal');
+        ftData = [];
+        names.forEach((n, i) => {
+            if(n.value.trim() !== "" && goals[i].value > 0) {
+                ftData.push({ 
+                    name: n.value, goal: parseInt(goals[i].value), count: 0, 
+                    startCount: 0, firstCatchAmt: 0, times: [], lastSpan: "--:--" 
+                });
+            }
+        });
+        if(ftData.length === 0) return alert("Enter species and goal.");
+        saveFTState();
+        document.getElementById('ft-setup').style.display = 'none';
+        document.getElementById('ft-main').style.display = 'block';
+        renderFTTabs();
+        updateFTUI();
+    }
+
+    function startClock() {
+        if (!ftClockInterval) {
+            ftClockInterval = setInterval(() => {
+                if(!ftStartTime) return;
+                const elapsed = Math.floor((Date.now() - ftStartTime) / 1000);
+                const clock = document.getElementById('live-clock');
+                if(clock) clock.innerText = `${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+    }
+
+    function logFT(amt) {
+        const now = Date.now();
+        let cur = ftData[ftActiveIdx];
+        if(cur.count >= cur.goal) return;
+
+        if (ftStartTime && (now - ftStartTime > 3600000)) {
+            cur.times = []; cur.startCount = cur.count; cur.lastSpan = "--:--"; cur.firstCatchAmt = 0;
+        }
+
+        if (cur.times.length === 0) {
+            cur.startCount = cur.count; cur.firstCatchAmt = amt; startClock();
+        } else {
+            const diff = Math.floor((now - ftStartTime) / 1000);
+            cur.lastSpan = `${Math.floor(diff/60).toString().padStart(2,'0')}:${(diff%60).toString().padStart(2,'0')}`;
+        }
+
+        cur.count += amt;
+        if(cur.count > cur.goal) cur.count = cur.goal;
+        cur.times.push(now);
+        ftStartTime = now;
+        saveFTState();
+        updateFTUI();
+    }
+
+    function saveFTState() {
+        localStorage.setItem('ft_data', JSON.stringify(ftData));
+        localStorage.setItem('ft_active_idx', ftActiveIdx);
+        if (ftStartTime) localStorage.setItem('ft_start_time', ftStartTime.toString());
+    }
+
+    function resetFreeTemTracker() {
+        if(confirm("Clear current session?")) {
+            localStorage.removeItem('ft_data'); localStorage.removeItem('ft_active_idx'); localStorage.removeItem('ft_start_time');
+            location.reload();
+        }
+    }
+
+    function updateFTUI() {
+        let cur = ftData[ftActiveIdx];
+        if (!cur) return;
+        const perc = (cur.count / cur.goal) * 100;
+        document.getElementById('cur-tem').innerText = cur.name;
+        document.getElementById('ft-count').innerText = `${cur.count} / ${cur.goal} (${perc.toFixed(1)}%)`;
+        document.getElementById('ft-progress').style.width = perc + '%';
+        document.getElementById('last-span').innerText = cur.lastSpan;
+        if(cur.times.length >= 2) {
+            const totalSec = (cur.times[cur.times.length-1] - cur.times[0]) / 1000;
+            const caught = cur.count - (cur.startCount + cur.firstCatchAmt);
+            const avg = totalSec / (caught || 1);
+            const m = Math.floor(avg / 60), s = Math.floor(avg % 60);
+            document.getElementById('ft-avg').innerText = m > 0 ? `${m}m ${s}s` : `${s}s`;
+            const rem = cur.goal - cur.count;
+            const finish = new Date(Date.now() + (avg * rem * 1000));
+            document.getElementById('ft-finish').innerText = finish.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+    }
+
+    function renderFTTabs() {
+        const container = document.getElementById('tab-container');
+        if(!container) return;
+        container.innerHTML = '';
+        ftData.forEach((d, i) => {
+            const t = document.createElement('div');
+            t.className = `tab ${i === ftActiveIdx ? 'active' : ''}`;
+            t.innerText = d.name;
+            t.onclick = () => { ftActiveIdx = i; saveFTState(); renderFTTabs(); updateFTUI(); };
+            container.appendChild(t);
+        });
+    }
+
+    // --- BREEDING LAB LOGIC ---
+function populateModalMoves(name) {
+        const eggContainer = document.getElementById('modal-egg-moves');
+        eggContainer.innerHTML = '';
+        
+        const familyName = TEM_DATABASE[name] ? TEM_DATABASE[name].family : name;
+        let eggMoves = typeof FAMILY_DATA !== 'undefined' ? (FAMILY_DATA[familyName] || []) : [];
+        
+        if (eggMoves.length === 0) {
+            eggContainer.innerHTML = '<span style="font-size:11px; color:#888; grid-column: span 2;">None available</span>';
+        } else {
+            // Sort egg moves alphabetically
+            eggMoves = [...eggMoves].sort((a, b) => a.localeCompare(b));
+            eggMoves.forEach(move => {
+                eggContainer.innerHTML += `<label><input type="checkbox" class="egg-move-check" value="${move}"> <span style="font-size:11px;">${move}</span></label>`;
+            });
+        }
+
+        const parentContainer = document.getElementById('modal-parent-moves');
+        parentContainer.innerHTML = '';
+        let parentMoves = TEM_DATABASE[name] ? TEM_DATABASE[name].parent_moves || [] : [];
+        if (parentMoves.length === 0) {
+            parentContainer.innerHTML = '<span style="font-size:11px; color:#888; grid-column: span 2;">None available</span>';
+        } else {
+            // Sort parent moves alphabetically
+            parentMoves = [...parentMoves].sort((a, b) => a.localeCompare(b));
+            parentMoves.forEach(move => {
+                parentContainer.innerHTML += `<label><input type="checkbox" class="parent-move-check" value="${move}"> <span style="font-size:11px;">${move}</span></label>`;
+            });
+        }
+    }
+
+    function updateAutoFertility() {
+        const checkedCount = document.querySelectorAll('.sv-check:checked').length;
+        let calculatedFert = 8 - Math.floor(checkedCount / 2);
+        if (checkedCount === 1) {
+            calculatedFert = 7;
+        } else if (checkedCount > 1) {
+            calculatedFert = 8 - Math.floor((checkedCount + 1) / 2);
+        }
+        document.getElementById('breed-fert').value = Math.max(0, Math.min(8, calculatedFert));
+    }
+
+    function renderLumaCheckbox(isChecked) {
+        const container = document.getElementById('modal-luma-container');
+        if (!container) return;
+        container.innerHTML = `
+            <div style="margin: 5px 0 15px 0; background: #252525; padding: 10px; border-radius: 6px; border: 1px solid #333;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #fff; font-weight: bold; font-size: 13px; margin: 0; text-transform: none;">
+                    <input type="checkbox" id="breed-luma" ${isChecked ? 'checked' : ''} style="transform: scale(1.3); cursor: pointer; margin: 0;"> 
+                     ✨ Luma Variant
+                </label>
+            </div>
+        `;
+    }
 
     function openBreedingModal() {
-        const name = document.getElementById('breed-search').value;
-        if (!temNames.includes(name)) return alert("Select a valid Temtem from the list.");
+        editingStockId = null; 
+        const name = document.getElementById('master-breed-search').value.trim();
+        if (!TEM_DATABASE[name]) return alert("Select a valid species.");
+        
         document.getElementById('modalTemName').innerText = name;
+        document.getElementById('breed-gender').value = 'Male';
+        document.getElementById('breed-fert').value = 8;
+        
+        // Render dynamic un-checked Luma box safely
+        renderLumaCheckbox(false);
+        
+        populateModalMoves(name);
+        document.querySelectorAll('.sv-check, .egg-move-check, .parent-move-check').forEach(cb => cb.checked = false);
+        
+        document.querySelectorAll('.sv-check').forEach(cb => {
+            cb.onchange = updateAutoFertility;
+        });
+
+        document.getElementById('breedingModal').style.display = "block";
+    }
+
+	function editStock(id) {
+        const stock = breedingStock.find(s => s.id === id);
+        if (!stock) return;
+        editingStockId = id; 
+        
+        document.getElementById('modalTemName').innerText = stock.name;
+        document.getElementById('breed-gender').value = stock.gender;
+        document.getElementById('breed-fert').value = stock.fert;
+        
+        // Render dynamic checked Luma state safely
+        renderLumaCheckbox(stock.isLuma || false);
+        
+        populateModalMoves(stock.name);
+        
+        document.querySelectorAll('.sv-check').forEach(cb => { cb.checked = stock.svs.includes(cb.value); });
+        document.querySelectorAll('.egg-move-check').forEach(cb => { cb.checked = (stock.eggMoves || []).includes(cb.value); });
+        document.querySelectorAll('.parent-move-check').forEach(cb => { cb.checked = (stock.parentMoves || []).includes(cb.value); });
+        
+        document.querySelectorAll('.sv-check').forEach(cb => {
+            cb.onchange = updateAutoFertility;
+        });
+
         document.getElementById('breedingModal').style.display = "block";
     }
 
     function closeModal() {
+        editingStockId = null;
         document.getElementById('breedingModal').style.display = "none";
-        document.querySelectorAll('.sv-check').forEach(cb => cb.checked = false);
-        document.getElementById('breed-moves').value = "";
     }
 
     function saveBreedingStock() {
         const name = document.getElementById('modalTemName').innerText;
-        const gender = document.getElementById('breed-gender').value;
-        const fert = document.getElementById('breed-fert').value;
-        const moves = document.getElementById('breed-moves').value;
         const svs = Array.from(document.querySelectorAll('.sv-check:checked')).map(cb => cb.value);
+        const eggMoves = Array.from(document.querySelectorAll('.egg-move-check:checked')).map(cb => cb.value);
+        const parentMoves = Array.from(document.querySelectorAll('.parent-move-check:checked')).map(cb => cb.value);
+        const gender = document.getElementById('breed-gender').value;
+        const fert = parseInt(document.getElementById('breed-fert').value) || 0;
+        
+        // Safely extract the dynamically generated checkbox state
+        const lumaCheckbox = document.getElementById('breed-luma');
+        const isLuma = lumaCheckbox ? lumaCheckbox.checked : false;
 
-        const newEntry = { id: Date.now(), name, gender, fert, moves, svs };
-        breedingStock.push(newEntry);
+        if (editingStockId) {
+            const index = breedingStock.findIndex(s => s.id === editingStockId);
+            if (index > -1) {
+                breedingStock[index] = { ...breedingStock[index], gender, fert, eggMoves, parentMoves, svs, isLuma };
+            }
+            editingStockId = null; 
+        } else {
+            breedingStock.push({ id: Date.now(), name, gender, fert, eggMoves, parentMoves, svs, isLuma });
+        }
+
         localStorage.setItem('breeding_stock', JSON.stringify(breedingStock));
-        renderBreedingStock();
+        renderBreedingStock(); 
         closeModal();
-        document.getElementById('breed-search').value = "";
+        
+        if (isBreedingFiltered) toggleBreedingFilter();
     }
 
     function deleteStock(id) {
@@ -293,37 +484,204 @@
         localStorage.setItem('breeding_stock', JSON.stringify(breedingStock));
         renderBreedingStock();
     }
-
+	
     function renderBreedingStock() {
         const list = document.getElementById('breeding-stock-list');
         list.innerHTML = '';
         breedingStock.forEach(s => {
             const item = document.createElement('div');
             item.className = 'stock-item';
-            item.innerHTML = `
-                <button class="delete-btn" onclick="deleteStock(${s.id})" style="position:absolute; right:15px; top:15px;">Remove</button>
-                <h4>${s.name} (${s.gender === 'Male' ? '♂' : '♀'})</h4>
-                <div class="stock-details">
-                    <div>Fertility: ${s.fert}/8</div>
-                    <div>SVs: ${s.svs.map(sv => `<span class="sv-tag">${sv}</span>`).join('') || 'None'}</div>
-                    <div style="margin-top:5px; font-style:italic;">Moves: ${s.moves || 'None'}</div>
-                </div>
-            `;
+            
+            const eMoves = s.eggMoves || [];
+            const pMoves = s.parentMoves || [];
+            const types = TEM_DATABASE[s.name] ? TEM_DATABASE[s.name].type : [];
+            
+            let lumaIconHtml = s.isLuma ? '<img src="icons/luma.png" class="type-icon" title="Luma" alt="Luma" style="margin-right: 6px;">' : '';
+            const typeHtml = '<span class="type-container">' + lumaIconHtml + getTypeIcons(types) + '</span>';
+
+            const eMovesHtml = eMoves.length > 0 ? eMoves.map(m => `<span class="sv-tag" style="background:#3498db; margin-top: 2px;">${m}</span>`).join(' ') : '<span style="font-size:10px; color:#666;">None</span>';
+            const pMovesHtml = pMoves.length > 0 ? pMoves.map(m => `<span class="sv-tag" style="background:#3498db; margin-top: 2px;">${m}</span>`).join(' ') : '<span style="font-size:10px; color:#666;">None</span>';
+
+            // Fixed: Built as a safe array string join to prevent Notepad++ template parser failure
+            item.innerHTML = [
+                '<button class="delete-btn" onclick="editStock(' + s.id + ')" style="position:absolute; right:75px; top:15px; color:#3498db; font-weight:bold;">Edit</button>',
+                '<button class="delete-btn" onclick="deleteStock(' + s.id + ')" style="position:absolute; right:15px; top:15px;">Remove</button>',
+                '<h4 style="margin: 0 0 10px 0; font-size: 16px;" class="stock-title">' + s.name + ' (' + (s.gender === 'Male' ? '♂' : '♀') + ')' + typeHtml + '</h4>',
+                '<div class="stock-details">',
+                    '<div style="font-size: 13px; color: #aaa; margin-bottom: 8px;">Fertility: ' + s.fert + '/8</div>',
+                    '<div style="margin: 5px 0 12px 0;">' + s.svs.map(sv => '<span class="sv-tag" style="background: #444; font-weight: bold;">' + sv + '</span>').join('') + '</div>',
+                    '<div style="margin-top:10px; border-top:1px solid #333; padding-top:8px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">',
+                        '<div>',
+                            '<div style="font-size:10px; color:var(--primary); font-weight:bold; margin-bottom: 4px; letter-spacing: 0.5px;">EGG MOVES</div>',
+                            '<div style="display: flex; flex-wrap: wrap; gap: 4px;">' + eMovesHtml + '</div>',
+                        '</div>',
+                        '<div>',
+                            '<div style="font-size:10px; color:var(--primary); font-weight:bold; margin-bottom: 4px; letter-spacing: 0.5px;">PARENT MOVES</div>',
+                            '<div style="display: flex; flex-wrap: wrap; gap: 4px;">' + pMovesHtml + '</div>',
+                        '</div>',
+                    '</div>',
+                '</div>'
+            ].join('');
+
             list.appendChild(item);
         });
     }
 
-    /* DEX LOGIC */
+    // --- NEW FILTER FUNCTIONALITY ---
+    function toggleBreedingFilter() {
+        const query = document.getElementById('master-breed-search').value.trim().toLowerCase();
+        const cards = document.querySelectorAll('#breeding-stock-list .stock-item');
+        const filterBtn = document.getElementById('breedFilterBtn');
+
+        if (!query && !isBreedingFiltered) {
+            alert("Please type a species name into the field to filter your active cards.");
+            return;
+        }
+
+        if (!isBreedingFiltered) {
+            cards.forEach(card => {
+                const titleText = card.querySelector('.stock-title').innerText.toLowerCase();
+                if (titleText.includes(query)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            filterBtn.innerText = "Show All";
+            filterBtn.style.backgroundColor = "#e67e22"; 
+            isBreedingFiltered = true;
+        } else {
+            cards.forEach(card => card.style.display = '');
+            filterBtn.innerText = "Filter View";
+            filterBtn.style.backgroundColor = "#2ecc71"; 
+            isBreedingFiltered = false;
+        }
+    }
+
+    // --- BREEDING PLANS LOGIC ---
+    function createPlan() {
+        const name = document.getElementById('master-breed-search').value.trim();
+        if (!TEM_DATABASE[name]) return alert("Select a valid species.");
+        
+        const newPlan = { id: 'plan_' + Date.now(), species: name, checks: {} };
+        breedingPlans.push(newPlan);
+        localStorage.setItem('breeding_plans', JSON.stringify(breedingPlans));
+        
+        document.getElementById('master-breed-search').value = '';
+        renderPlans();
+        
+        showView('plans-view', document.getElementById('nav-plans'));
+    }
+
+    function togglePlanCheck(planId, checkId) {
+        const plan = breedingPlans.find(p => p.id === planId);
+        if (plan) {
+            plan.checks[checkId] = !plan.checks[checkId];
+            localStorage.setItem('breeding_plans', JSON.stringify(breedingPlans));
+        }
+    }
+
+    function deletePlan(id) {
+        breedingPlans = breedingPlans.filter(p => p.id !== id);
+        localStorage.setItem('breeding_plans', JSON.stringify(breedingPlans));
+        renderPlans();
+    }
+
+    function renderPlans() {
+        const container = document.getElementById('plans-container');
+        container.innerHTML = '';
+        
+        breedingPlans.forEach(plan => {
+            const c = plan.checks || {};
+            
+            const cb = (id, label, fert) => `
+                <div class="plan-sub-item">
+                    <input type="checkbox" ${c[id] ? 'checked' : ''} onchange="togglePlanCheck('${plan.id}', '${id}')">
+                    <span>${label}</span>
+                    <span class="fert-tag">Fert: ${fert}</span>
+                </div>
+            `;
+            
+            const card = document.createElement('div');
+            card.className = 'plan-card';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 15px;">
+                    <h3 style="margin:0; font-size:18px;">${plan.species} <span style="font-size: 11px; color: #888; font-weight: normal; margin-left: 8px;">PERFECT 7SV</span></h3>
+                    <button class="delete-btn" onclick="deletePlan('${plan.id}')" style="margin:0; color:#e74c3c;">Delete</button>
+                </div>
+                
+                <div class="plan-step">
+                    <div class="plan-step-header">Phase 1: Base Tems (Catch)</div>
+                    <div style="font-size:9px; color:#aaa; margin-bottom:6px;">Assuming 1SV catches start at 7 fertility</div>
+                    ${cb('b_atk', '1x ATK (Aggressive)', 7)}
+                    ${cb('b_spa', '1x SPATK (Gifted)', 7)}
+                    ${cb('b_spd1', '1x SPD (Lithe)', 7)}
+                    ${cb('b_spd2', '1x SPD (Lithe)', 7)}
+                    ${cb('b_hp1', '1x HP (Vitality)', 7)}
+                    ${cb('b_hp2', '1x HP (Vitality)', 7)}
+                    ${cb('b_sta1', '1x STA (Endurance)', 7)}
+                    ${cb('b_sta2', '1x STA (Endurance)', 7)}
+                    ${cb('b_def', '1x DEF (Hardening)', 7)}
+                    ${cb('b_spdef', '1x SPDEF (Dominant)', 7)}
+                </div>
+
+                <div class="plan-step">
+                    <div class="plan-step-header">Phase 2: 2SV Generation</div>
+                    <div style="font-size:9px; color:#aaa; margin-bottom:6px;">Logic: min(7,7) - 1 = 6</div>
+                    ${cb('2_atk_spa', 'ATK / SPATK (Mighty)', 6)}
+                    ${cb('2_hp_sta1', 'HP / STA (Vigor)', 6)}
+                    ${cb('2_hp_sta2', 'HP / STA (Vigor)', 6)}
+                    ${cb('2_def_spd', 'DEF / SPDEF (Immunity)', 6)}
+                </div>
+
+                <div class="plan-step">
+                    <div class="plan-step-header">Phase 3: 3SV Generation</div>
+                    <div style="font-size:9px; color:#aaa; margin-bottom:6px;">Logic: min(6,7) - 1 = 5</div>
+                    ${cb('3_left', 'ATK / SPATK / SPD', 5)}
+                    ${cb('3_right', 'DEF / SPDEF / SPD', 5)}
+                </div>
+
+                <div class="plan-step">
+                    <div class="plan-step-header">Phase 4: 5SV Generation</div>
+                    <div style="font-size:9px; color:#aaa; margin-bottom:6px;">Logic: min(5,6) - 1 = 4</div>
+                    ${cb('5_left', 'ATK / SPATK / SPD / HP / STA', 4)}
+                    ${cb('5_right', 'DEF / SPDEF / SPD / HP / STA', 4)}
+                </div>
+
+                <div class="plan-step" style="border: 1px solid #2ecc71; background: #1a251d;">
+                    <div class="plan-step-header" style="color: #2ecc71;">Phase 5: Final Result</div>
+                    <div style="font-size:9px; color:#aaa; margin-bottom:6px;">Logic: min(4,4) - 1 = 3</div>
+                    ${cb('7_perf', `Perfect 7SV ${plan.species}`, 3)}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // --- MISC ---
     function renderDex() {
         const tbody = document.getElementById('dex-body');
-        if (!tbody) return;
         tbody.innerHTML = '';
-        temNames.forEach((name, index) => {
-            const num = (index + 1).toString().padStart(3, '0');
-            const id = name.toLowerCase().replace(/\s/g, '');
+        
+        let displayIndex = 0;
+        let lastBaseName = '';
+
+        Object.keys(TEM_DATABASE).forEach((name) => {
+            const baseName = name.split(' (')[0];
+            if (baseName !== lastBaseName) {
+                displayIndex++;
+                lastBaseName = baseName;
+            }
+
+            const num = displayIndex.toString().padStart(3, '0');
+            
+            const spaceRegex = new RegExp('\\s', 'g');
+            const parenRegex = new RegExp('[()]', 'g');
+            const id = name.toLowerCase().replace(spaceRegex, '').replace(parenRegex, ''); 
+            
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><span style="color:#666; margin-right:8px;">#${num}</span> ${name}</td>
+                <td>#${num} ${name}</td>
                 <td><input type="checkbox" class="save-state-perm" id="c_${id}"></td>
                 <td><input type="checkbox" class="save-state-perm" id="l_${id}"></td>
                 <td><input type="checkbox" class="save-state-perm" id="u_${id}"></td>
@@ -335,35 +693,31 @@
 
     function filterDex() {
         const query = document.getElementById('dex-search').value.toLowerCase();
-        const rows = document.querySelectorAll('#dex-body tr');
-        rows.forEach(row => {
-            const name = row.cells[0].innerText.toLowerCase();
-            row.style.display = name.includes(query) ? '' : 'none';
+        document.querySelectorAll('#dex-body tr').forEach(row => {
+            row.style.display = row.cells[0].innerText.toLowerCase().includes(query) ? '' : 'none';
         });
     }
 
-    /* MISC TASK LOGIC */
-    let miscTasks = JSON.parse(localStorage.getItem('misc_tasks') || '[]');
     function addMiscTask() {
         const input = document.getElementById('misc-input');
         if (!input.value.trim()) return;
-        const newTask = { id: 'm_' + Date.now(), text: input.value, checked: false };
-        miscTasks.push(newTask);
-        saveMisc();
+        miscTasks.push({ id: 'm_' + Date.now(), text: input.value, checked: false });
+        localStorage.setItem('misc_tasks', JSON.stringify(miscTasks));
         input.value = '';
         renderMisc();
     }
+
     function toggleMisc(id) {
         const task = miscTasks.find(t => t.id === id);
-        if (task) task.checked = !task.checked;
-        saveMisc();
+        if (task) { task.checked = !task.checked; localStorage.setItem('misc_tasks', JSON.stringify(miscTasks)); }
     }
+
     function deleteMisc(id) {
         miscTasks = miscTasks.filter(t => t.id !== id);
-        saveMisc();
+        localStorage.setItem('misc_tasks', JSON.stringify(miscTasks));
         renderMisc();
     }
-    function saveMisc() { localStorage.setItem('misc_tasks', JSON.stringify(miscTasks)); }
+
     function renderMisc() {
         const list = document.getElementById('misc-list');
         list.innerHTML = '';
@@ -379,80 +733,11 @@
         });
     }
 
-    /* UI NAVIGATION */
     function showView(viewId, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById(viewId).classList.add('active');
         el.classList.add('active');
-    }
-
-    /* FREETEM LOGIC */
-    let ftData = [];
-    let ftActiveIdx = 0;
-    let ftStartTime = null;
-    let ftClockInterval = null;
-
-    function startFreeTem() {
-        const names = document.querySelectorAll('.tem-name');
-        const goals = document.querySelectorAll('.tem-goal');
-        names.forEach((n, i) => {
-            if(n.value.trim() !== "" && goals[i].value > 0) {
-                ftData.push({ name: n.value, goal: parseInt(goals[i].value), count: 0, times: [], lastSpan: "--:--" });
-            }
-        });
-        if(ftData.length === 0) return alert("Enter at least one Tem.");
-        document.getElementById('ft-setup').style.display = 'none';
-        document.getElementById('ft-main').style.display = 'block';
-        renderFTTabs();
-        updateFTUI();
-    }
-
-    function renderFTTabs() {
-        const container = document.getElementById('tab-container');
-        container.innerHTML = '';
-        ftData.forEach((d, i) => {
-            const t = document.createElement('div');
-            t.className = `tab ${i === ftActiveIdx ? 'active' : ''}`;
-            t.innerText = d.name;
-            t.onclick = () => { ftActiveIdx = i; renderFTTabs(); updateFTUI(); };
-            container.appendChild(t);
-        });
-    }
-
-    function logFT(amt) {
-        const now = Date.now();
-        let cur = ftData[ftActiveIdx];
-        if(cur.count >= cur.goal) return;
-        if(ftStartTime) {
-            const diff = Math.floor((now - ftStartTime) / 1000);
-            cur.lastSpan = `${Math.floor(diff/60).toString().padStart(2,'0')}:${(diff%60).toString().padStart(2,'0')}`;
-        } else {
-            ftClockInterval = setInterval(() => {
-                if(!ftStartTime) return;
-                const elapsed = Math.floor((Date.now() - ftStartTime) / 1000);
-                document.getElementById('live-clock').innerText = `${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
-            }, 1000);
-        }
-        cur.count += amt;
-        if(cur.count > cur.goal) cur.count = cur.goal;
-        cur.times.push(now);
-        ftStartTime = now;
-        updateFTUI();
-    }
-
-    function updateFTUI() {
-        let cur = ftData[ftActiveIdx];
-        const perc = (cur.count / cur.goal) * 100;
-        document.getElementById('cur-tem').innerText = cur.name;
-        document.getElementById('ft-count').innerText = `${cur.count} / ${cur.goal} (${perc.toFixed(1)}%)`;
-        document.getElementById('ft-progress').style.width = perc + '%';
-        document.getElementById('last-span').innerText = cur.lastSpan;
-        if(cur.times.length > 1) {
-            const total = (cur.times[cur.times.length-1] - cur.times[0]) / 1000;
-            const avg = total / (cur.times.length-1);
-            document.getElementById('ft-avg').innerText = `${Math.floor(avg/60)}m ${Math.floor(avg%60)}s`;
-        }
     }
 
     function checkWeeklyReset() {
@@ -462,14 +747,12 @@
         const diff = now.getDate() - day + (day === 0 ? -6 : 1);
         const startOfWeek = new Date(now.setDate(diff));
         startOfWeek.setHours(0, 0, 0, 0);
-
         if (!lastReset || new Date(lastReset) < startOfWeek) {
             document.querySelectorAll('.save-state').forEach(cb => {
                 cb.checked = false;
                 localStorage.setItem(cb.id, false);
             });
             localStorage.setItem('lastResetDate', startOfWeek.toISOString());
-            location.reload(); 
         }
     }
 
