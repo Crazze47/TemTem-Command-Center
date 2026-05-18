@@ -301,6 +301,7 @@ function renderBreedingStock() {
         const pMovesHtml = pMoves.length > 0 ? pMoves.map(m => `<span class="sv-tag" style="background:#3498db; margin-top: 2px;">${m}</span>`).join(' ') : '<span style="font-size:10px; color:#666;">None</span>';
 
         item.innerHTML = [
+            '<button class="delete-btn" onclick="evolveStock(' + s.id + ')" style="position:absolute; right:135px; top:15px; color:#9b59b6; font-weight:bold;">Evolve</button>',
             '<button class="delete-btn" onclick="editStock(' + s.id + ')" style="position:absolute; right:75px; top:15px; color:#3498db; font-weight:bold;">Edit</button>',
             '<button class="delete-btn" onclick="deleteStock(' + s.id + ')" style="position:absolute; right:15px; top:15px;">Remove</button>',
             '<h4 style="margin: 0 0 10px 0; font-size: 16px;" class="stock-title">' + s.name + ' (' + (s.gender === 'Male' ? '♂' : '♀') + ')' + typeHtml + '</h4>',
@@ -351,6 +352,79 @@ function toggleBreedingFilter() {
         filterBtn.innerText = "Filter View";
         filterBtn.style.backgroundColor = "#2ecc71"; 
         isBreedingFiltered = false;
+    }
+}
+
+function evolveStock(id) {
+    const stockIndex = breedingStock.findIndex(s => s.id === id);
+    if (stockIndex === -1) return;
+
+    const currentName = breedingStock[stockIndex].name;
+    const familyName = TEM_DATABASE[currentName]?.family || currentName;
+
+    // Find all other species in the database that share this family
+    const familyMembers = Object.keys(TEM_DATABASE).filter(name => {
+        const dbFamily = TEM_DATABASE[name]?.family || name;
+        return dbFamily === familyName && name !== currentName;
+    });
+
+    if (familyMembers.length === 0) {
+        return alert(`${currentName} does not have any known family members in the database.`);
+    }
+
+    // If there is only one other family member, auto-evolve to save a click
+    if (familyMembers.length === 1) {
+        applyEvolution(id, familyMembers[0]);
+        return;
+    }
+
+    // If there are multiple family members (3-stage lines), create a dynamic modal dropdown
+    const modalId = 'evo-dropdown-modal';
+    let modal = document.getElementById(modalId);
+    
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'modal';
+        document.body.appendChild(modal);
+    }
+
+    const optionsHtml = familyMembers.map(m => `<option value="${m}">${m}</option>`).join('');
+
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width:400px;">
+            <h2 class="modal-header" style="color:#9b59b6;">Evolve ${currentName}</h2>
+            <label>Select Evolution Stage</label>
+            <select id="evo-select-dropdown" style="width:100%; padding:8px; margin-bottom:15px; background:#2a2a2a; color:white; border:1px solid #444; border-radius:5px;">
+                ${optionsHtml}
+            </select>
+            <div class="modal-btns">
+                <button class="btn" id="confirm-evo-btn" style="flex:2; margin:0; background:#9b59b6; color:white;">Confirm Evolution</button>
+                <button class="btn" id="cancel-evo-btn" style="background:#444; color:white; flex:1; margin:0;">Cancel</button>
+            </div>
+        </div>
+    `;
+
+    modal.style.display = 'block';
+
+    document.getElementById('confirm-evo-btn').onclick = () => {
+        const nextEvo = document.getElementById('evo-select-dropdown').value;
+        modal.style.display = 'none';
+        applyEvolution(id, nextEvo);
+    };
+
+    document.getElementById('cancel-evo-btn').onclick = () => {
+        modal.style.display = 'none';
+    };
+}
+
+function applyEvolution(id, nextName) {
+    const stockIndex = breedingStock.findIndex(s => s.id === id);
+    if (stockIndex > -1) {
+        breedingStock[stockIndex].name = nextName;
+        localStorage.setItem('breeding_stock', JSON.stringify(breedingStock));
+        renderBreedingStock();
+        editStock(id); // Immediately open the edit modal to assign new parent moves
     }
 }
 

@@ -108,10 +108,10 @@
             <input type="text" id="master-breed-search" list="temList" placeholder="Enter species to vault, plan, or filter...">
             
             <div style="display: flex; gap: 10px;">
-                <button class="btn btn-red" onclick="openBreedingModal()" style="margin:0; flex: 1;">Add</button>
-                <button class="btn btn-blue" onclick="createPlan()" style="margin:0; flex: 1;">Create Plan</button>
-                <button class="btn" id="breedFilterBtn" onclick="toggleBreedingFilter()" style="margin:0; flex: 1; background: #2ecc71; color: white;">Filter View</button>
-            </div>
+    <button class="btn btn-red" onclick="openBreedingModal()" style="margin:0; flex: 1;">Add</button>
+    <button class="btn btn-blue" onclick="openPlanSetupModal()" style="margin:0; flex: 1;">Create Plan</button>
+    <button class="btn" id="breedFilterBtn" onclick="toggleBreedingFilter()" style="margin:0; flex: 1; background: #2ecc71; color: white;">Filter View</button>
+</div>
         </div>
         
         <div class="stock-list" id="breeding-stock-list" style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 15px; overflow-y: auto; align-content: flex-start; padding-right: 10px;"></div>
